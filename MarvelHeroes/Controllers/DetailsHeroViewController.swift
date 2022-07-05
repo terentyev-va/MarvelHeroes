@@ -58,6 +58,7 @@ class DetailsHeroViewController: UIViewController {
         setConstraints()
         setDelegates()
         setupInfoHero()
+        getRandomHeroes()
     }
     
     private func setupViews() {
@@ -70,7 +71,7 @@ class DetailsHeroViewController: UIViewController {
         }
         
         view.addSubview(heroImageView)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: idRandomHeroCollectionView)
+        collectionView.register(RandomHeroCollectionViewCell.self, forCellWithReuseIdentifier: idRandomHeroCollectionView)
         view.addSubview(collectionView)
         view.addSubview(exploreMoreLabel)
         view.addSubview(descriptionLabel)
@@ -98,18 +99,27 @@ class DetailsHeroViewController: UIViewController {
             }
         }
     }
+    
+    private func getRandomHeroes() {
+        for _ in 0...9 {
+            let endPoint = heroesArray.count - 1
+            let randomInt = Int.random(in: 0...endPoint)
+            randomHeroesArray.append(heroesArray[randomInt])
+        }
+    }
 }
 
 //MARK: - UICollectionViewDataSource
 
 extension DetailsHeroViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        15
+        randomHeroesArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: idRandomHeroCollectionView, for: indexPath)
-        cell.backgroundColor = .red
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: idRandomHeroCollectionView, for: indexPath) as! RandomHeroCollectionViewCell
+        let heroModel = randomHeroesArray[indexPath.row]
+        cell.cellConfigure(model: heroModel)
         return cell
     }
 }
@@ -120,7 +130,12 @@ extension DetailsHeroViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        print("cell")
+        let heroModel = randomHeroesArray[indexPath.row]
+        
+        let detailsHeroViewController = DetailsHeroViewController()
+        detailsHeroViewController.heroModel = heroModel
+        detailsHeroViewController.heroesArray = heroesArray
+        navigationController?.pushViewController(detailsHeroViewController, animated: true)
     }
 }
 

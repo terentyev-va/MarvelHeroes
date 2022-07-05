@@ -34,6 +34,20 @@ class RandomHeroCollectionViewCell: UICollectionViewCell {
         addSubview(heroImageView)
     }
     
+    func cellConfigure(model: HeroesModel) {
+        guard let url = model.thumbnail.url else { return }
+        NetworkImageRequest.shared.requestImage(url: url) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let data):
+                let image = UIImage(data: data)
+                self.heroImageView.image = image
+            case .failure(_):
+                print("AlertHere")
+            }
+        }
+    }
+    
     private func setConstraints() {
       
         NSLayoutConstraint.activate([
