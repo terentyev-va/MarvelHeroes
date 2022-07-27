@@ -25,6 +25,9 @@ class MainViewController: UIViewController {
     
     private let idCollectionView = "idCollectionView"
     private var heroesArray = [HeroesModel]()
+    
+    private var isFiltred = false
+    private var filtredArray = [IndexPath]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,6 +82,8 @@ class MainViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         
+        searchController.searchResultsUpdater = self
+        searchController.delegate = self
     }
     
     private func getHeroesArray() {
@@ -91,6 +96,12 @@ class MainViewController: UIViewController {
                 self.heroesArray = heroMarvelArray
                 self.collectionView.reloadData()
             }
+        }
+    }
+    
+    private func setAlphaForCell(alpha: Double) {
+        collectionView.visibleCells.forEach { cell in
+            cell.alpha = alpha
         }
     }
 }
@@ -134,8 +145,44 @@ extension MainViewController: UICollectionViewDelegate {
         detailsHeroViewController.heroesArray = heroesArray
         navigationController?.pushViewController(detailsHeroViewController, animated: true)
     }
+}
+
+// MARK: UISearchResultsUpdating
+
+extension MainViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        
+        guard let text = searchController.searchBar.text else { return }
+        filterContentForSearchText(text)
+    }
     
+    private func filterContentForSearchText(_ searchText: String) {
+        
+        for (value, hero) in heroesArray.enumerated() {
+            let indexPath: IndexPath = [0, value]
+            let cell = collectionView.cellForItem(at: indexPath)
+            if hero.name.lowercased().contains(searchText.lowercased()) {
+                filtredArray.append(indexPath)
+                cell?.alpha = 1
+            } else {
+                cell?.alpha = 0.3
+            }
+        }
+    }
+}
+
+//MARK: - UISearchControllerDelegate
+
+extension MainViewController: UISearchControllerDelegate {
+    func didPresentSearchController(_ searchController: UISearchController) {
+        isFiltred = true
+        setAlphaForCell(alpha: 0.3)
+    }
     
+    func didDismissSearchController(_ searchController: UISearchController) {
+        isFiltred = false
+        setAlphaForCell(alpha: 1)
+    }
 }
 
 extension MainViewController {
